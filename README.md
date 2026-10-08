@@ -2,7 +2,7 @@
 
 MATLAB code accompanying the manuscript:
 
-**Dahl, C. D. (). _Task informativeness and process bottlenecks determine cumulative cultural dynamics._**
+**Dahl, C. D. (). _Task structure and interacting learning processes shape cumulative cultural dynamics._**
 
 The model treats cumulative culture as structured population-level search. It separates behavioural innovation, access to demonstrators, copying fidelity, evaluation and retention, while manipulating how informative intermediate task states are. The repository contains the final analysis pipeline used for the manuscript. Historical exploratory/development scripts are intentionally excluded; Git should be used to track future code revisions.
 
