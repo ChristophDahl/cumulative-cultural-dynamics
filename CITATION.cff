@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript and the software release."
+title: "Cumulative Cultural Dynamics"
+type: software
+authors:
+  - family-names: "Dahl"
+    given-names: "Christoph D."
+    affiliation: "Graduate Institute of Mind, Brain and Consciousness, Taipei Medical University"
+version: "1.0.0"
+date-released: "2026-10-07"
+license: "MIT"
+keywords:
+  - cumulative culture
+  - cultural evolution
+  - social learning
+  - transmission fidelity
+  - task informativeness
+  - simulation
+  - MATLAB
+preferred-citation:
+  type: article
+  title: "Task informativeness and process bottlenecks determine cumulative cultural dynamics"
+  authors:
+    - family-names: "Dahl"
+      given-names: "Christoph D."
+ 
