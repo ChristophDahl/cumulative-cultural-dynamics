@@ -234,7 +234,7 @@ ylabel(cb, 'Final mean quality, social', ...
 %     'FontSize', STYLE.SuperTitleFontSize, ...
 %     'FontWeight', 'normal');
 
-exportFigure(fig, paperDir, 'Fig_1', STYLE);
+exportFigure(fig, paperDir, 'Fig1', STYLE);
 close(fig);
 end
 
@@ -482,7 +482,7 @@ annotation(fig, 'textbox', [0.090 0.47 0.30 0.025], ...
     'HorizontalAlignment', 'left', ...
     'FitBoxToText', 'on');
 
-exportFigure(fig, paperDir, 'Fig_2', STYLE);
+exportFigure(fig, paperDir, 'Fig2', STYLE);
 close(fig);
 end
 
@@ -613,7 +613,7 @@ ylabel(cb, 'Normalised social gain', ...
     'FontSize', STYLE.LabelFontSize);
 
 % No overall title, matching the main figures.
-exportFigure(fig, paperDir, 'Fig_S1', STYLE);
+exportFigure(fig, paperDir, 'S1_fig', STYLE);
 close(fig);
 end
 
@@ -826,42 +826,95 @@ end
 % =========================================================================
 % EXPORT
 % =========================================================================
-function exportFigure(fig, paperDir, fileStem, STYLE)
+% function exportFigure(fig, paperDir, fileStem, STYLE)
+% 
+% pngFile = fullfile(paperDir, [fileStem '.png']);
+% pdfFile = fullfile(paperDir, [fileStem '.pdf']);
+% figFile = fullfile(paperDir, [fileStem '.fig']);
+% 
+% % Save the editable MATLAB figure.
+% savefig(fig, figFile);
+% 
+% % Export tightly cropped publication files.
+% % exportgraphics removes the large page margins introduced by print().
+% try
+%     exportgraphics(fig, pngFile, ...
+%         'Resolution', STYLE.PNGResolution, ...
+%         'BackgroundColor', 'white');
+% 
+%     exportgraphics(fig, pdfFile, ...
+%         'ContentType', 'vector', ...
+%         'BackgroundColor', 'white');
+% catch ME
+%     % Fallback for older MATLAB versions without exportgraphics.
+%     warning('exportgraphics failed (%s). Falling back to print().', ME.message);
+% 
+%     set(fig, 'PaperPositionMode', 'auto');
+% 
+%     % PNG fallback.
+%     print(fig, pngFile, '-dpng', sprintf('-r%d', STYLE.PNGResolution));
+% 
+%     % PDF fallback.
+%     try
+%         print(fig, pdfFile, '-dpdf', '-painters', '-bestfit');
+%     catch
+%         print(fig, pdfFile, '-dpdf', '-painters');
+%     end
+% end
+% end
 
-pngFile = fullfile(paperDir, [fileStem '.png']);
-pdfFile = fullfile(paperDir, [fileStem '.pdf']);
-figFile = fullfile(paperDir, [fileStem '.fig']);
+function exportFigure(fig, outDir, fileStem, STYLE)
+% Export figures in five formats:
+% FIG  - editable MATLAB figure
+% PDF  - vector graphics
+% PNG  - high-resolution raster
+% TIFF - high-resolution journal submission
+% EPS  - vector journal submission
 
-% Save the editable MATLAB figure.
-savefig(fig, figFile);
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
 
-% Export tightly cropped publication files.
-% exportgraphics removes the large page margins introduced by print().
+base = fullfile(outDir, fileStem);
+
+% Preserve editable figure
+savefig(fig, [base '.fig']);
+
 try
-    exportgraphics(fig, pngFile, ...
+    % Existing formats
+    exportgraphics(fig, [base '.png'], ...
         'Resolution', STYLE.PNGResolution, ...
         'BackgroundColor', 'white');
 
-    exportgraphics(fig, pdfFile, ...
+    exportgraphics(fig, [base '.pdf'], ...
         'ContentType', 'vector', ...
         'BackgroundColor', 'white');
+
+    % New: TIFF at 600 dpi
+    exportgraphics(fig, [base '.tif'], ...
+        'Resolution', 600, ...
+        'BackgroundColor', 'white');
+
+    % New: vector EPS
+    exportgraphics(fig, [base '.eps'], ...
+        'ContentType', 'vector', ...
+        'BackgroundColor', 'white');
+
 catch ME
-    % Fallback for older MATLAB versions without exportgraphics.
-    warning('exportgraphics failed (%s). Falling back to print().', ME.message);
+    warning('exportgraphics failed: %s. Using print().', ME.message);
 
     set(fig, 'PaperPositionMode', 'auto');
 
-    % PNG fallback.
-    print(fig, pngFile, '-dpng', sprintf('-r%d', STYLE.PNGResolution));
+    print(fig, [base '.png'], '-dpng', ...
+        sprintf('-r%d', STYLE.PNGResolution));
 
-    % PDF fallback.
-    try
-        print(fig, pdfFile, '-dpdf', '-painters', '-bestfit');
-    catch
-        print(fig, pdfFile, '-dpdf', '-painters');
-    end
+    print(fig, [base '.pdf'], '-dpdf', '-painters');
+    print(fig, [base '.tif'], '-dtiff', '-r600');
+    print(fig, [base '.eps'], '-depsc', '-painters');
 end
+
 end
+
 
 
 % =========================================================================
