@@ -138,7 +138,7 @@ for it = 1:numel(cfgCtrl.tauLevels)
     end
 end
 
-exportFigure(fig,outDir,'Fig_3',STYLE); close(fig);
+exportFigure(fig,outDir,'Fig3',STYLE); close(fig);
 end
 
 % =========================================================================
@@ -185,7 +185,7 @@ set(lgd,'FontName',STYLE.FontName,'FontSize',STYLE.LegendFontSize, ...
     'Units','normalized','Position',[0.34 0.025 0.32 0.035]);
 lgd.ItemTokenSize=[24 8];
 
-exportFigure(fig,outDir,'Fig_4',STYLE); close(fig);
+exportFigure(fig,outDir,'Fig4',STYLE); close(fig);
 end
 
 % =========================================================================
@@ -222,7 +222,7 @@ for it=1:numel(cfg.tauLevels)
         lgd.ItemTokenSize=[24 8];
     end
 end
-exportFigure(fig,outDir,'Fig_S2',STYLE); close(fig);
+exportFigure(fig,outDir,'S2_fig',STYLE); close(fig);
 end
 
 % =========================================================================
@@ -263,7 +263,7 @@ lgd=legend(shared,compose('\\tau = %.2f',cfg.tauLevels), ...
 set(lgd,'FontName',STYLE.FontName,'FontSize',STYLE.LegendFontSize, ...
     'Units','normalized','Position',[0.34 0.025 0.32 0.035]);
 lgd.ItemTokenSize=[24 8];
-exportFigure(fig,outDir,'Fig_S3',STYLE); close(fig);
+exportFigure(fig,outDir,'S3_fig',STYLE); close(fig);
 end
 
 function s=axisLabel(iff)
@@ -296,22 +296,58 @@ function [m,e]=meanAndCIHalfWidth(x)
 x=x(:); x=x(~isnan(x)); m=mean(x); e=1.96*std(x,0)/sqrt(numel(x));
 end
 
-function exportFigure(fig,outDir,stem,S)
-savefig(fig,fullfile(outDir,[stem '.fig']));
+function exportFigure(fig, outDir, fileStem, STYLE)
+% Export figures in five formats:
+% FIG  - editable MATLAB figure
+% PDF  - vector graphics
+% PNG  - high-resolution raster
+% TIFF - high-resolution journal submission
+% EPS  - vector journal submission
+
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+
+base = fullfile(outDir, fileStem);
+
+% Preserve editable figure
+savefig(fig, [base '.fig']);
+
 try
-    exportgraphics(fig,fullfile(outDir,[stem '.png']),'Resolution',S.PNGResolution,'BackgroundColor','white');
-    exportgraphics(fig,fullfile(outDir,[stem '.pdf']),'ContentType','vector','BackgroundColor','white');
+    % Existing formats
+    exportgraphics(fig, [base '.png'], ...
+        'Resolution', STYLE.PNGResolution, ...
+        'BackgroundColor', 'white');
+
+    exportgraphics(fig, [base '.pdf'], ...
+        'ContentType', 'vector', ...
+        'BackgroundColor', 'white');
+
+    % New: TIFF at 600 dpi
+    exportgraphics(fig, [base '.tif'], ...
+        'Resolution', 600, ...
+        'BackgroundColor', 'white');
+
+    % New: vector EPS
+    exportgraphics(fig, [base '.eps'], ...
+        'ContentType', 'vector', ...
+        'BackgroundColor', 'white');
+
 catch ME
-    warning('exportgraphics failed (%s). Falling back to print().',ME.message);
-    set(fig,'PaperPositionMode','auto');
-    print(fig,fullfile(outDir,[stem '.png']),'-dpng',sprintf('-r%d',S.PNGResolution));
-    try
-        print(fig,fullfile(outDir,[stem '.pdf']),'-dpdf','-painters','-bestfit');
-    catch
-        print(fig,fullfile(outDir,[stem '.pdf']),'-dpdf','-painters');
-    end
+    warning('exportgraphics failed: %s. Using print().', ME.message);
+
+    set(fig, 'PaperPositionMode', 'auto');
+
+    print(fig, [base '.png'], '-dpng', ...
+        sprintf('-r%d', STYLE.PNGResolution));
+
+    print(fig, [base '.pdf'], '-dpdf', '-painters');
+    print(fig, [base '.tif'], '-dtiff', '-r600');
+    print(fig, [base '.eps'], '-depsc', '-painters');
 end
+
 end
+
 
 function out=ternary(cond,a,b)
 if cond, out=a; else, out=b; end
